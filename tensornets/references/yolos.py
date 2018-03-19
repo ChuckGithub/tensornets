@@ -28,6 +28,9 @@ from ..ops import *
 from ..utils import set_args
 from ..utils import var_scope
 
+from .yolo_utils import opts
+from .yolo_utils import get_boxes
+
 
 def __args__(is_training):
     return [([batch_norm], {'center': False, 'scale': True,
@@ -59,13 +62,10 @@ def _stack(x, filters, blocks, scope=None):
 
 @var_scope('localflatten')
 def local_flatten(x, scope=None):
-    filters = x.shape[-1].value
-    x = expand_dims(x, -2, name='pre')
     x = concat([x[:, 0::2, 0::2], x[:, 0::2, 1::2],
                 x[:, 1::2, 0::2], x[:, 1::2, 1::2]],
-               axis=3, name='concat')
-    return reshape(x, [-1] + [s.value for s in x.shape[1:-2]] + [filters * 4],
-                   name='out')
+               axis=-1, name='concat')
+    return x
 
 
 def yolo(x, blocks, filters, is_training, classes, scope=None, reuse=None):
@@ -118,25 +118,41 @@ def tinyyolo(x, filters, is_training, classes, scope=None, reuse=None):
 @var_scope('REFyolov2')
 @set_args(__args__)
 def yolov2(x, is_training=False, classes=1000, scope=None, reuse=None):
-    return yolo(x, [1, 1, 3, 3, 5, 5], 425, is_training, classes, scope, reuse)
+    def _get_boxes(*args, **kwargs):
+        return get_boxes(opts('yolov2'), *args, **kwargs)
+    x = yolo(x, [1, 1, 3, 3, 5, 5], 425, is_training, classes, scope, reuse)
+    x.get_boxes = _get_boxes
+    return x
 
 
 @var_scope('REFyolov2voc')
 @set_args(__args__)
 def yolov2voc(x, is_training=False, classes=1000, scope=None, reuse=None):
-    return yolo(x, [1, 1, 3, 3, 5, 5], 125, is_training, classes, scope, reuse)
+    def _get_boxes(*args, **kwargs):
+        return get_boxes(opts('yolov2voc'), *args, **kwargs)
+    x = yolo(x, [1, 1, 3, 3, 5, 5], 125, is_training, classes, scope, reuse)
+    x.get_boxes = _get_boxes
+    return x
 
 
 @var_scope('REFtinyyolov2')
 @set_args(__args__)
 def tinyyolov2(x, is_training=False, classes=1000, scope=None, reuse=None):
-    return tinyyolo(x, [512, 425], is_training, classes, scope, reuse)
+    def _get_boxes(*args, **kwargs):
+        return get_boxes(opts('tinyyolov2'), *args, **kwargs)
+    x = tinyyolo(x, [512, 425], is_training, classes, scope, reuse)
+    x.get_boxes = _get_boxes
+    return x
 
 
 @var_scope('REFtinyyolov2voc')
 @set_args(__args__)
 def tinyyolov2voc(x, is_training=False, classes=1000, scope=None, reuse=None):
-    return tinyyolo(x, [1024, 125], is_training, classes, scope, reuse)
+    def _get_boxes(*args, **kwargs):
+        return get_boxes(opts('tinyyolov2voc'), *args, **kwargs)
+    x = tinyyolo(x, [1024, 125], is_training, classes, scope, reuse)
+    x.get_boxes = _get_boxes
+    return x
 
 
 # Simple alias.

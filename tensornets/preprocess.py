@@ -104,7 +104,7 @@ def wrn_preprocess(x):
 def darknet_preprocess(x, target_size=None):
     # Refer to the following darkflow
     # https://github.com/thtrieu/darkflow/blob/master/darkflow/net/yolo/predict.py
-    if target_size is None:
+    if target_size is None or target_size[0] is None or target_size[1] is None:
         y = x.copy()
     else:
         h, w = target_size
@@ -114,6 +114,17 @@ def darknet_preprocess(x, target_size=None):
             y[i] = cv2.resize(x[i], (w, h), interpolation=cv2.INTER_CUBIC)
     y = y[:, :, :, ::-1]
     y /= 255.
+    return y
+
+
+def faster_rcnn_preprocess(x):
+    # Refer to the following py-faster-rcnn
+    # https://github.com/rbgirshick/py-faster-rcnn/blob/master/lib/fast_rcnn/test.py#L22
+    # https://github.com/rbgirshick/py-faster-rcnn/blob/master/lib/fast_rcnn/config.py#L181
+    y = x.copy()
+    y[:, :, :, 0] -= 102.9801
+    y[:, :, :, 1] -= 115.9465
+    y[:, :, :, 2] -= 122.7717
     return y
 
 
@@ -158,4 +169,6 @@ __preprocess_dict__ = {
     'REFyolov2': darknet_preprocess,
     'REFyolov2voc': darknet_preprocess,
     'REFtinyyolov2voc': darknet_preprocess,
+    'REFfasterrcnnZFvoc': faster_rcnn_preprocess,
+    'REFfasterrcnnVGG16voc': faster_rcnn_preprocess,
 }
