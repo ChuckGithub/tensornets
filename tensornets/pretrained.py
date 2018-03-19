@@ -504,7 +504,7 @@ def load_ref_faster_rcnn_zf_voc(scopes, return_fn=_assign):
     weights_path = get_file(
         filename, __model_url__ + 'rcnn/' + filename,
         cache_subdir='models',
-        file_hash='1f1c1cdf53b93dde51bbb6e85b15aca8')
+        file_hash='825577525217176903ee9b096bb1cb64')
     values = parse_weights(weights_path)
     return return_fn(scopes, values)
 
@@ -515,7 +515,7 @@ def load_ref_faster_rcnn_vgg16_voc(scopes, return_fn=_assign):
     weights_path = get_file(
         filename, __model_url__ + 'rcnn/' + filename,
         cache_subdir='models',
-        file_hash='b73fefc9bf560bcb558d2559df5fed92')
+        file_hash='2dfa10d64c169cf105b36c209be91316')
     values = parse_weights(weights_path)
     return return_fn(scopes, values)
 
