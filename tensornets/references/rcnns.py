@@ -71,8 +71,8 @@ def rp_net(x, filters, original_height, original_width, scales,
     width = tf.shape(x)[2]
 
     x1 = conv2d(x, 2 * anchors, 1, scope='logits')
-    x1 = tf.reshape(x1, (-1, height, width, anchors, 2))
-    x1 = tf.nn.softmax(x1)
+    x1 = tf.reshape(x1, (-1, height, width, 2, anchors))
+    x1 = tf.nn.softmax(x1, dim=3)
     x1 = reshape(x1, (-1, height, width, 2 * anchors), name='probs')
 
     x2 = conv2d(x, 4 * anchors, 1, scope='boxes')
@@ -95,7 +95,8 @@ def rp_net(x, filters, original_height, original_width, scales,
 
         # Convert anchors into proposals via bbox transformations
         # 2. clip predicted boxes to image
-        proposals = inv_boxes(shifted_anchors, bbox_deltas, original_height, original_width)
+        proposals = inv_boxes(shifted_anchors, bbox_deltas,
+                              original_height, original_width)
 
         # 3. remove predicted boxes with either height or width < threshold
         # (NOTE: convert min_size to input image scale stored in im_info[2])
