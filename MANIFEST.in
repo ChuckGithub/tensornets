@@ -1,1 +1,2 @@
 recursive-include tensornets *.names
+recursive-include tensornets/references *
